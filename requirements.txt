@@ -1,0 +1,8 @@
+keras
+tensorflow
+sklearn
+pandas
+xlrd
+xlwr
+luigi
+gensim

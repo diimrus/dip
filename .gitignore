@@ -1,0 +1,8 @@
+dist
+datasets
+.vscode
+__pycache__
+venv
+*.pyc
+*.bin
+*.xlsx
