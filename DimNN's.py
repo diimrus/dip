@@ -512,3 +512,52 @@ class MyNN10 (KerasNeuralNetworkClassificatorTask):
         plt.savefig(str(Path(self.output().path).with_suffix('.png')))
 
         return model
+
+class MyNN11 (KerasNeuralNetworkClassificatorTask):
+    _name = 'mynn11'
+
+    def build_and_train(self, x, y):
+        from keras.layers import Dense, Activation, Flatten, Dropout
+        from keras.models import Sequential
+        from sklearn.preprocessing import LabelBinarizer
+        import matplotlib.pyplot as plt
+            
+        encoder = LabelBinarizer()
+        onehot_y = encoder.fit_transform(y)
+
+        lx,ly,lz = x.shape
+        self.meta.update({
+                "word_vec_size": lz,
+                "len_words": ly,
+                "encoder_classes": encoder.classes_
+            })
+
+        model = Sequential()
+
+        model.add(Dense(120, activation='tanh', input_shape=(ly, lz)))
+        model.add(Dense(60, activation='tanh', input_shape=(ly, lz)))
+        model.add(Dropout(0.1))
+        model.add(Dense(30, activation='tanh', input_shape=(ly, lz)))
+        model.add(Flatten())
+        model.add(Dense(onehot_y.shape[1], activation='softmax'))
+        
+        model.compile('Adam', loss='mse', metrics=['acc'])
+        
+        history = model.fit(x, onehot_y, batch_size=5, epochs=100, validation_split=0.1)
+
+        scores = float(model.test_on_batch(x, onehot_y)[0])
+        print(f'точность на тестовых данных: {scores*100}')
+
+        plt.figure(0)
+        plt.subplot(2, 1, 1)
+        plt.plot(history.history['loss'])
+        plt.plot(history.history['val_loss'], '--')
+        plt.title('Loss')
+        plt.legend(['Loss', 'Val loss'])
+
+        plt.subplot(2, 1, 2)
+        plt.title('Acc')
+        plt.plot(history.history['acc'])
+        plt.savefig(str(Path(self.output().path).with_suffix('.png')))
+
+        return model
